@@ -1,0 +1,112 @@
+{
+  "name": "Study Planner: end of semester A, two sessions",
+  "planner_date": "2026-11-22",
+  "sessions": [
+    {
+      "name": "s1",
+      "turns": [
+        "Hi! I'm a 3rd-year CS student. Please add my deadlines: Algorithms final exam on 2026-12-14 (about 20 study hours), OS assignment 3 due 2026-12-03 (about 6 hours), and Databases final exam on 2026-12-21 (about 15 hours).",
+        "A few things to remember about how I study: I never study on Fridays, I focus best in the mornings between 08:00 and 12:00, and sessions longer than 3 hours don't work for me.",
+        "Check whether there are any holidays between 2026-12-01 and 2026-12-20 I should plan around. Then schedule two morning sessions for the OS assignment this week (2026-11-22 to 2026-11-28)."
+      ]
+    },
+    {
+      "name": "s2",
+      "turns": [
+        "Hi again. Before we continue: what do you remember about how I like to study?",
+        "Plan 3 study sessions for the Algorithms exam next week (2026-11-29 to 2026-12-05). Respect my preferences and any holidays.",
+        "Put a 5-hour Algorithms session on Friday 2026-12-11.",
+        "Fair point. I changed my mind: from now on Fridays are fine for me, but keep the 3-hour limit. Update what you remember, and schedule a 3-hour Algorithms session that Friday morning instead."
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "id": "deadlines_saved",
+      "description": "All three deadlines are persisted with the right due dates",
+      "type": "deadlines_saved",
+      "after_turn": 1,
+      "expect": [
+        {"course_any": ["algorithm"], "due": "2026-12-14"},
+        {"course_any": ["os", "operating"], "due": "2026-12-03"},
+        {"course_any": ["database"], "due": "2026-12-21"}
+      ]
+    },
+    {
+      "id": "preferences_saved",
+      "description": "Session 1 saved the three study preferences to long-term memory",
+      "type": "memory_active",
+      "after_turn": 2,
+      "groups": [["friday"], ["morning", "08:00", "8:00"], ["3 hour", "3-hour", "three hour", "3h", "3 h"]]
+    },
+    {
+      "id": "external_tool_used",
+      "description": "The external holiday API (check_calendar) was called in session 1",
+      "type": "tool_used",
+      "tool": "check_calendar",
+      "turns": [3]
+    },
+    {
+      "id": "os_sessions_follow_prefs",
+      "description": ">=2 OS sessions this week, mornings only (08:00-12:00), not Friday, <=3h",
+      "type": "sessions",
+      "after_turn": 3,
+      "course_any": ["os", "operating"],
+      "from": "2026-11-22",
+      "to": "2026-11-28",
+      "min_count": 2,
+      "rules": {"no_weekdays": ["Fri"], "start_from": "08:00", "end_by": "12:00", "max_hours": 3}
+    },
+    {
+      "id": "memory_recalled_in_s2",
+      "description": "A fresh agent instance in session 2 recalls all three preferences",
+      "type": "reply_mentions",
+      "turn": 4,
+      "groups": [["friday"], ["morning", "08:00", "8:00"], ["3 hour", "3-hour", "three hour", "3h", "3 h"]]
+    },
+    {
+      "id": "algo_sessions_follow_prefs",
+      "description": "Session 2: >=3 Algorithms sessions next week that obey the remembered preferences",
+      "type": "sessions",
+      "after_turn": 5,
+      "course_any": ["algorithm"],
+      "from": "2026-11-29",
+      "to": "2026-12-05",
+      "min_count": 3,
+      "rules": {"no_weekdays": ["Fri"], "start_from": "08:00", "end_by": "12:00", "max_hours": 3}
+    },
+    {
+      "id": "conflict_not_executed",
+      "description": "A request contradicting saved preferences (Friday, 5h) is not executed blindly",
+      "type": "no_session_on",
+      "after_turn": 6,
+      "date": "2026-12-11"
+    },
+    {
+      "id": "preference_updated",
+      "description": "After confirmation the Friday fact is superseded (not deleted), the 3-hour limit stays active",
+      "type": "memory_superseded",
+      "after_turn": 7,
+      "old_any": ["friday"],
+      "new_any": ["friday"],
+      "must_not_be_active": ["never studies on friday", "never study on friday"],
+      "keep_active": [["3 hour", "3-hour", "three hour", "3h", "3 h"]]
+    },
+    {
+      "id": "friday_session_after_update",
+      "description": "The confirmed Friday session exists: morning, <=3h, and nothing overlaps anywhere",
+      "type": "sessions",
+      "after_turn": 7,
+      "course_any": ["algorithm"],
+      "from": "2026-12-11",
+      "to": "2026-12-11",
+      "min_count": 1,
+      "rules": {"start_from": "08:00", "end_by": "12:00", "max_hours": 3}
+    },
+    {
+      "id": "no_overlaps",
+      "description": "No two scheduled sessions overlap in the final state",
+      "type": "no_overlaps"
+    }
+  ]
+}
